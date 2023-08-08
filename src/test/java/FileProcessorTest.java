@@ -13,10 +13,6 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileProcessorTest {
-    //since we are allowing for two different input types for file path,
-    // we want to make sure both work as excpected
-
-
     //test readFiles:
     //This is a blackbox test - we only care about the input (file path) and the output (the content of the file)
     //since we want tests to be as flexible as possible.
@@ -135,8 +131,3 @@ public class FileProcessorTest {
     }
 
 }
-
-
-
-
-//src/main/resources/mobydick.txt
