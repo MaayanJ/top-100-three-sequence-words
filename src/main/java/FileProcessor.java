@@ -28,7 +28,8 @@ public class FileProcessor {
             }
             if(fileFound) {
                 Map<String, Integer> mostCommonSequences = findCommonThreeWordsSequences((validateContent(content)));
-                printMostCommonSequences(sortSequencesByValue(mostCommonSequences), path);
+                List<String> list = sortSequencesByValue(mostCommonSequences);
+                printMostCommonSequences(list, path);
             }
         }
     }
@@ -119,19 +120,21 @@ public class FileProcessor {
      * @Return a sorted map with reduced top 100 values
      * @param sequences
      */
-    protected Stream<Map.Entry<String, Integer>> sortSequencesByValue(Map<String, Integer> sequences) {
-       return sequences.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(100);
+    protected List<String> sortSequencesByValue(Map<String, Integer> sequences) {
+       List<String> list = new ArrayList<>();
+       sequences.entrySet()
+               .stream()
+               .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+               .limit(100).forEach(s-> list.add(s.getKey() + " - " + s.getValue()));
+        return list;
     }
 
     /**
      * prints top values
      * @param sortedSequences
      */
-    private void printMostCommonSequences(Stream<Map.Entry<String, Integer>> sortedSequences, String path) {
-        System.out.println("Processing file: " + path + "---------------------------");
+    private void printMostCommonSequences(List<String> sortedSequences, String path) {
+        System.out.println("Processing file: " + path + "---------------------------" + "\n");
         sortedSequences.forEach(s -> System.out.println(s));
     }
 }
