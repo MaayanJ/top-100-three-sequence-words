@@ -11,4 +11,4 @@ COPY . /top-100-three-sequence-words
 WORKDIR /top-100-three-sequence-words
 RUN ./gradlew build
 ENTRYPOINT ["./gradlew", "run"]
-CMD ["--args='src/main/resources/mobydick.txt'"]
+#CMD ["--args='src/main/resources/mobydick.txt'"]

@@ -4,46 +4,64 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 public class FileProcessor {
 
+    /**
+     * This method orchestrates the entire process of reading, validating, filtering and sorting a file
+     * and well as printing out the results.
+     * The method iterate through a list of filePaths and passes each down to the appropriate methods
+     * @param filePaths
+     */
     public void processFiles(Set<String> filePaths) {
         boolean fileFound = false;
-        String line = "";
-        String content = "";
         for(String path:filePaths) {
-            try (BufferedReader reader =
-                         Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8 )) {
-                while((line = reader.readLine()) != null) {
-                    if(!line.isEmpty()) {
-                        content += line + " ";
-                    }
-//                    System.out.println(content);
-                }
+            String content ="";
+            try {
+                content = readFiles(path);
                 fileFound = true;
-
-
-            } catch (IOException e) {
-                System.out.println("File with the path " + path + " was not found. If you entered other paths, those will continue to process");
+            }
+            catch (IOException e) {
+                System.out.println("file with path: " + path + "was not found. If you entered more than one path, those will continue to process");
+            }
+            if(fileFound) {
+                Map<String, Integer> mostCommonSequences = findCommonThreeWordsSequences((validateContent(content)));
+                printMostCommonSequences(sortSequencesByValue(mostCommonSequences), path);
             }
         }
+    }
 
-        validateContent(content);
-        Map<String,Integer> mostCommonSequences = findCommonThreeWordsSequences((validateContent(content)));
-        printMostCommonSequences(sortSequencesByValue(mostCommonSequences));
 
+    protected String readFiles(String filePath) throws IOException {
+        String line = "";
+        String content = "";
+        BufferedReader reader = Files.newBufferedReader(Paths.get(filePath), StandardCharsets.UTF_8);
+        while((line = reader.readLine()) != null) {
+            if(!line.isEmpty()) {
+                content += line + " ";
+            }
+        }
+        //prevent memory leaks.
+        reader.close();
+        return content;
     }
     /**
      * Since we wish to ignore punctuation and letter case,
      * we need to first process the content and make the appropriate modifications (i.e making all letters lower case etc.)
      * @param fileContent
      */
-    private String validateContent(String fileContent) {
+    protected String validateContent(String fileContent) {
         String str= fileContent;
-        str = (str.replaceAll("[^a-zA-Z']"," ").replaceAll("'", "").replaceAll("\\s+", " ")).toLowerCase();;
+        str = (str.
+                replaceAll("[^a-zA-Z']"," ")
+                .replaceAll("'", "")
+                .replaceAll("[^\\p{ASCII}]", "")
+                .replaceAll("\\p{C}", " ")
+                .replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "")
+                .replaceAll(" \\p{Sc}", " ")
+                .replaceAll("\\s+", " ")).toLowerCase();
         return str;
     }
 
@@ -56,9 +74,9 @@ public class FileProcessor {
      * At the end of each iteration, all pointers are incremented/decremented accordingly (1 and 2 will increment and 3 and 4 will decrement)
      * so all pointers work in an outside in approach until they meet, then the loop is terminated.
      * @Return a sorted map with reduced top 100 values
-     * @param String content
+     * @param content
      */
-    private Map<String, Integer> findCommonThreeWordsSequences(String content) {
+    protected Map<String, Integer> findCommonThreeWordsSequences(String content) {
         Map<String, Integer> commonSequences = new HashMap<>();
 
         //4 pointers solution with sliding windows for every 3 words from both ends of the array.
@@ -73,7 +91,7 @@ public class FileProcessor {
         int thirdPointer = listOfWords.size()-3;
         int forthPointer = listOfWords.size()-1;
 
-        while(firstPointer <= thirdPointer) {
+        while(firstPointer < thirdPointer) {
             StringBuffer phrase1 = new StringBuffer();
             StringBuffer phrase2 = new StringBuffer();
 
@@ -101,18 +119,19 @@ public class FileProcessor {
      * @Return a sorted map with reduced top 100 values
      * @param sequences
      */
-    private Stream<Map.Entry<String, Integer>> sortSequencesByValue(Map<String, Integer> sequences) {
+    protected Stream<Map.Entry<String, Integer>> sortSequencesByValue(Map<String, Integer> sequences) {
        return sequences.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(100); // can further process it));
+                .limit(100);
     }
 
     /**
      * prints top values
      * @param sortedSequences
      */
-    private void printMostCommonSequences(Stream<Map.Entry<String, Integer>> sortedSequences) {
+    private void printMostCommonSequences(Stream<Map.Entry<String, Integer>> sortedSequences, String path) {
+        System.out.println("Processing file: " + path + "---------------------------");
         sortedSequences.forEach(s -> System.out.println(s));
     }
 }
