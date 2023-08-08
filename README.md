@@ -50,11 +50,11 @@ src/main/resources/mobydick.txt
 
 To build and ran the application with Docker with arguments:
 ```bash
- docker build -t top-100-three-sequence-words . --args='src/main/resources/mobydick.txt'
+ docker build -t top-100-three-sequence-words .
 ```
 Then
 ```bash
-docker run -it top-100-three-sequence-words
+docker run -it top-100-three-sequence-words --args='src/main/resources/mobydick.txt'
 ```
 In order to run without arguments, ran:
 ```bash
